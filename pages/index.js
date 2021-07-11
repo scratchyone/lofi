@@ -31,7 +31,6 @@ function audioVolumeIn(q, ms) {
   var eAudio = setInterval(function () {
     InT += speed;
     q.volume = InT.clamp(0, 1);
-    console.log('Fade In: ' + q.volume);
     if (InT >= setVolume) {
       clearInterval(eAudio);
     }
@@ -46,7 +45,6 @@ function audioVolumeOut(q, ms) {
   var fAudio = setInterval(function () {
     InT -= speed;
     q.volume = InT.clamp(0, 1);
-    console.log('Fade Out: ' + q.volume);
     if (InT <= setVolume) {
       clearInterval(fAudio);
     }
@@ -66,7 +64,6 @@ export default function Home({ songs }) {
         audio.volume = 0;
         const audioFadeTime = 15;
         audio.onloadedmetadata = () => {
-          audio.currentTime = audio.duration - 50;
           setTimeout(() => {
             audioVolumeOut(audio, audioFadeTime * 1000);
             setSongDone(true);
