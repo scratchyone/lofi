@@ -27,6 +27,7 @@ export default function Home({ songs }) {
     <div className="main">
       <video playsInline autoPlay muted loop className="bg">
         <source src="girl.mp4" type="video/mp4" />
+        <source src="girl.webm" type="video/webm" />
       </video>
       <div className="title">{currSongName}</div>
       <div className="socials_wrapper">
