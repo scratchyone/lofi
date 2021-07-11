@@ -8,6 +8,51 @@ Array.prototype.random = function () {
   return this[Math.floor(Math.random() * this.length)];
 };
 
+/**
+ * Returns a number whose value is limited to the given range.
+ *
+ * Example: limit the output of this computation to between 0 and 255
+ * (x * 255).clamp(0, 255)
+ *
+ * @param {Number} min The lower boundary of the output range
+ * @param {Number} max The upper boundary of the output range
+ * @returns A number in the range [min, max]
+ * @type Number
+ */
+Number.prototype.clamp = function (min, max) {
+  return Math.min(Math.max(this, min), max);
+};
+
+function audioVolumeIn(q, ms) {
+  var InT = 0;
+  var setVolume = 1.0; // Target volume level for new song
+  var speed = setVolume / (ms / 10); // Rate of increase
+  q.volume = InT;
+  var eAudio = setInterval(function () {
+    InT += speed;
+    q.volume = InT.clamp(0, 1);
+    console.log('Fade In: ' + q.volume);
+    if (InT >= setVolume) {
+      clearInterval(eAudio);
+    }
+  }, 10);
+}
+
+function audioVolumeOut(q, ms) {
+  var InT = q.volume;
+  var setVolume = 0; // Target volume level for old song
+  var speed = InT / (ms / 10); // Rate of volume decrease
+  q.volume = InT;
+  var fAudio = setInterval(function () {
+    InT -= speed;
+    q.volume = InT.clamp(0, 1);
+    console.log('Fade Out: ' + q.volume);
+    if (InT <= setVolume) {
+      clearInterval(fAudio);
+    }
+  }, 10);
+}
+
 export default function Home({ songs }) {
   const [currSongName, setCurrSongName] = useState('');
   const [songDone, setSongDone] = useState(true);
@@ -18,8 +63,17 @@ export default function Home({ songs }) {
         const song = songs.random();
         setCurrSongName(song.name);
         const audio = new Audio(song.url);
-        audio.onended = () => setSongDone(true);
+        audio.volume = 0;
+        const audioFadeTime = 15;
+        audio.onloadedmetadata = () => {
+          audio.currentTime = audio.duration - 50;
+          setTimeout(() => {
+            audioVolumeOut(audio, audioFadeTime * 1000);
+            setSongDone(true);
+          }, (audio.duration - audio.currentTime - audioFadeTime) * 1000);
+        };
         await audio.play();
+        audioVolumeIn(audio, audioFadeTime * 1000);
       }
     })();
   }, [songDone, songs]);
